@@ -1,0 +1,32 @@
+# ── KRITIS: semua session login (setara password tiap platform) ──
+bridge/sessions/
+**/sessions/
+*.session
+*.seen.json
+
+# Secrets
+.env
+*.env
+!.env.example
+
+# Node
+node_modules/
+*.log
+
+# Python/Odoo
+__pycache__/
+*.py[cod]
+odoo.conf
+venv/
+.venv/
+
+# DB
+*.sql
+*.dump
+*.bak
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
