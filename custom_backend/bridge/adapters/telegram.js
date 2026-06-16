@@ -60,6 +60,7 @@ export class TelegramAdapter extends BaseAdapter {
             this._log(`✅ Connected as @${me.username || me.firstName}`);
 
             await this._syncDialogs();
+            await this._syncContacts();
             if (FETCH_HISTORY) await this._fetchHistory();
             this._registerHandlers();
         } catch (e) {
@@ -96,6 +97,21 @@ export class TelegramAdapter extends BaseAdapter {
             await this.syncChats(chats);
             this._log(`✅ Sync ${chats.length} chats`);
         } catch (e) { this._log(`Sync error: ${e.message}`); }
+    }
+
+    async _syncContacts() {
+        try {
+            const contacts = [];
+            for await (const dialog of this.client.iterDialogs({})) {
+                const e = dialog.entity;
+                if (e?.className === "User") {
+                    const name = [e.firstName, e.lastName].filter(Boolean).join(" ") || e.username || String(e.id);
+                    contacts.push({ jid: String(e.id), name });
+                }
+            }
+            await this.syncContacts(contacts);
+            this._log(`Sync ${contacts.length} contacts`);
+        } catch (e) { this._log(`Sync contacts err: ${e.message}`); }
     }
 
     async _fetchHistory() {
@@ -155,6 +171,25 @@ export class TelegramAdapter extends BaseAdapter {
         else if (msg.sticker) type = "sticker";
         else if (msg.geo) type = "location";
 
+        // detail
+        const replyToId = msg.replyToMsgId ? `${chatId}_${msg.replyToMsgId}` : null;
+        const isFwd = !!msg.fwdFrom;
+        // mentions dari entities
+        let mentions = "";
+        try {
+            const ents = (msg.entities || []).filter((e) =>
+                e.className === "MessageEntityMention" || e.className === "MessageEntityMentionName");
+            if (ents.length && msg.message) {
+                mentions = ents.map((e) => msg.message.substr(e.offset, e.length)).join(", ");
+            }
+        } catch {}
+        // reactions
+        let reactions = "";
+        try {
+            const rs = msg.reactions?.results || [];
+            reactions = rs.map((r) => `${r.reaction?.emoticon || "?"}:${r.count}`).join(" ");
+        } catch {}
+
         return {
             chat_jid: chatId, chat_name: chatName, chat_type: chatType,
             ext_message_id: `${chatId}_${msg.id}`,
@@ -164,6 +199,10 @@ export class TelegramAdapter extends BaseAdapter {
             message_type: type,
             message_text: msg.message || "",
             message_time: this.nowStr(new Date((msg.date || 0) * 1000)),
+            reply_to_ext_id: replyToId,
+            is_forwarded: isFwd,
+            mentions: mentions || null,
+            reactions: reactions || null,
         };
     }
 

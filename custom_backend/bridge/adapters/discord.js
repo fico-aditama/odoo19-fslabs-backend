@@ -28,6 +28,18 @@ export class DiscordAdapter extends BaseAdapter {
         });
         this.client.on("messageCreate", (m) => this._enqueue(this._build(m)));
         this.client.on("messageUpdate", (_, m) => { if (m?.content) this._enqueue(this._build(m, true)); });
+        this.client.on("messageReactionAdd", async (reaction) => {
+            try {
+                const msg = reaction.message;
+                await this.pushToOdoo("/cb/reaction", {
+                    session_token: this.token,
+                    reactions: [{
+                        ext_message_id: `${msg.channel?.id}_${msg.id}`,
+                        reactions: reaction.emoji?.name || "",
+                    }],
+                });
+            } catch (e) { this._log(`reaction err: ${e.message}`); }
+        });
         this.client.on("error", (e) => this._log(`err: ${e.message}`));
         this.client.on("disconnect", () => {
             if (!this._stopped) { this._log("Reconnect 5s…"); this._reconnect = setTimeout(() => this._connect(), 5000); }
@@ -63,6 +75,9 @@ export class DiscordAdapter extends BaseAdapter {
         } else if (msg.stickers?.size > 0) type = "sticker";
 
         const att = msg.attachments?.first();
+        const replyToId = msg.reference?.messageId ? `${chatId}_${msg.reference.messageId}` : null;
+        let mentions = "";
+        try { mentions = msg.mentions?.users?.map((u) => u.username).join(", ") || ""; } catch {}
         return {
             chat_jid: chatId,
             chat_name: isGuild ? `${msg.guild?.name} / #${msg.channel?.name}` : `DM:${msg.author?.username}`,
@@ -78,6 +93,8 @@ export class DiscordAdapter extends BaseAdapter {
             attachment_url: att?.url || null,
             attachment_mime: att?.contentType || null,
             attachment_filename: att?.name || null,
+            reply_to_ext_id: replyToId,
+            mentions: mentions || null,
         };
     }
 

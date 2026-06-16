@@ -4,7 +4,10 @@
   "description": "Unified multi-platform bridge: WhatsApp, Telegram, Discord, Instagram, Threads -> Odoo",
   "main": "index.js",
   "type": "module",
-  "scripts": { "start": "node index.js", "dev": "node --watch index.js" },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.0",
     "telegram": "^2.22.0",
@@ -15,6 +18,7 @@
     "express": "^4.18.0",
     "dotenv": "^16.3.1",
     "pino": "^8.16.0",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "qrcode": "^1.5.3"
   }
 }
