@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="cb_settings_singleton" model="cb.settings">
+        <field name="bridge_url">http://localhost:3000</field>
+        <field name="bridge_secret"></field>
+    </record>
+</odoo>

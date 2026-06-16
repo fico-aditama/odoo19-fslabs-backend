@@ -86,5 +86,6 @@ export class BaseAdapter {
     async submitCode()     { return false; }
     async submitPassword() { return false; }
     async sendMessage()    { throw new Error("sendMessage not implemented"); }
+    async resync()         { return { ok: false, error: "resync tidak didukung platform ini" }; }
     nowStr(d = new Date()) { return d.toISOString().replace("T", " ").slice(0, 19); }
 }

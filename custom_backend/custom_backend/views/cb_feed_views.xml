@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cb_feed_source_form" model="ir.ui.view">
+        <field name="name">cb.feed.source.form</field>
+        <field name="model">cb.feed.source</field>
+        <field name="arch" type="xml">
+            <form string="Feed Source">
+                <header>
+                    <button name="action_poll" type="object" string="⬇ Poll Now" class="btn-primary"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box">
+                        <button name="action_view_items" type="object" class="oe_stat_button" icon="fa-list">
+                            <field name="item_count" widget="statinfo" string="Items"/>
+                        </button>
+                    </div>
+                    <group>
+                        <field name="name"/>
+                        <field name="source_type"/>
+                        <field name="query"
+                               placeholder="News/Job: keyword — Medium: @username atau tag:topik"/>
+                        <field name="active"/>
+                        <field name="last_poll" readonly="1"/>
+                        <field name="last_error" readonly="1"/>
+                    </group>
+                    <group string="🔔 Alert to WhatsApp (realtime)">
+                        <field name="alert_enabled"/>
+                        <field name="alert_account_id" invisible="not alert_enabled"
+                               options="{'no_create': True}"/>
+                        <field name="alert_to" invisible="not alert_enabled"
+                               placeholder="628xxxx atau jid grup"/>
+                        <field name="alert_max_per_poll" invisible="not alert_enabled"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cb_feed_source_list" model="ir.ui.view">
+        <field name="name">cb.feed.source.list</field>
+        <field name="model">cb.feed.source</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/><field name="source_type" widget="badge"/>
+                <field name="query"/>
+                <field name="status" widget="badge"
+                       decoration-success="status=='ok'" decoration-danger="status=='error'"/>
+                <field name="item_count"/><field name="last_poll"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_cb_feed_source" model="ir.actions.act_window">
+        <field name="name">Feed Sources</field>
+        <field name="res_model">cb.feed.source</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_cb_feed_item_list" model="ir.ui.view">
+        <field name="name">cb.feed.item.list</field>
+        <field name="model">cb.feed.item</field>
+        <field name="arch" type="xml">
+            <list default_order="published desc">
+                <field name="published"/><field name="source_type" widget="badge"/>
+                <field name="title"/><field name="author"/>
+                <field name="url" widget="url"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cb_feed_item_form" model="ir.ui.view">
+        <field name="name">cb.feed.item.form</field>
+        <field name="model">cb.feed.item</field>
+        <field name="arch" type="xml">
+            <form string="Feed Item">
+                <sheet>
+                    <group>
+                        <field name="source_id" readonly="1"/>
+                        <field name="title" readonly="1"/>
+                        <field name="author" readonly="1"/>
+                        <field name="published" readonly="1"/>
+                        <field name="url" widget="url" readonly="1"/>
+                    </group>
+                    <group string="Summary"><field name="summary" nolabel="1" readonly="1"/></group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cb_feed_item_search" model="ir.ui.view">
+        <field name="name">cb.feed.item.search</field>
+        <field name="model">cb.feed.item</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="title"/><field name="author"/>
+                <filter string="Google News" name="gn" domain="[('source_type','=','google_news')]"/>
+                <filter string="Medium" name="md" domain="[('source_type','=','medium')]"/>
+                <filter string="Jobstreet" name="js" domain="[('source_type','=','jobstreet')]"/>
+                <filter string="Glints" name="gl" domain="[('source_type','=','glints')]"/>
+                <filter string="LinkedIn" name="li" domain="[('source_type','=','linkedin')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Source" name="by_src" context="{'group_by':'source_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cb_feed_item" model="ir.actions.act_window">
+        <field name="name">All Feed Items</field>
+        <field name="res_model">cb.feed.item</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_cb_feed_item_search"/>
+    </record>
+</odoo>

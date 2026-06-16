@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cron_cb_refresh_logs" model="ir.cron">
+        <field name="name">Custom Backend: Refresh Bridge Logs</field>
+        <field name="model_id" ref="model_cb_account"/>
+        <field name="state">code</field>
+        <field name="code">model.search([("status","=","connected")]).action_refresh_log()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="cron_cb_autoreply" model="ir.cron">
+        <field name="name">Custom Backend: Process Auto-Replies</field>
+        <field name="model_id" ref="model_cb_autoreply_log"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_process()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="cron_cb_email_fetch" model="ir.cron">
+        <field name="name">Custom Backend: Fetch Emails</field>
+        <field name="model_id" ref="model_cb_account"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_fetch_email()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="cron_cb_feed_poll" model="ir.cron">
+        <field name="name">Custom Backend: Poll Feeds</field>
+        <field name="model_id" ref="model_cb_feed_source"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_poll_all()</field>
+        <field name="interval_number">30</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="cron_cb_health" model="ir.cron">
+        <field name="name">Custom Backend: Bridge Health Check</field>
+        <field name="model_id" ref="model_cb_settings"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_health_check()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="cron_cb_market" model="ir.cron">
+        <field name="name">Custom Backend: Refresh Market Prices</field>
+        <field name="model_id" ref="model_cb_market_symbol"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_refresh_all()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

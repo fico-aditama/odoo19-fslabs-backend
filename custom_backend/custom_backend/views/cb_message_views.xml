@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cb_message_list" model="ir.ui.view">
+        <field name="name">cb.message.list</field>
+        <field name="model">cb.message</field>
+        <field name="arch" type="xml">
+            <list string="Messages" default_order="message_time desc"
+                  decoration-info="is_from_me == True" decoration-muted="is_edited == True"
+                  decoration-danger="is_deleted == True">
+                <field name="message_time"/>
+                <field name="platform" widget="badge"/>
+                <field name="chat_name"/>
+                <field name="chat_type" widget="badge"
+                       decoration-info="chat_type in ('group','channel')"/>
+                <field name="sender_name"/>
+                <field name="message_type" widget="badge"/>
+                <field name="message_text"/>
+                <field name="has_attachment" optional="show"/>
+                <field name="attachment_data" widget="binary" filename="attachment_filename" optional="hide"/>
+                <field name="attachment_url" widget="url" optional="hide"/>
+                <field name="is_forwarded" optional="hide"/>
+                <field name="reactions" optional="hide"/>
+                <field name="mentions" optional="hide"/>
+                <field name="delivery_status" widget="badge" optional="show"
+                       decoration-success="delivery_status == 'read'"
+                       decoration-info="delivery_status == 'delivered'"
+                       decoration-muted="delivery_status == 'sent'"/>
+                <field name="read_by" optional="hide"/>
+                <field name="is_story" optional="hide"/>
+                <field name="is_from_me" widget="boolean_toggle" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cb_message_form" model="ir.ui.view">
+        <field name="name">cb.message.form</field>
+        <field name="model">cb.message</field>
+        <field name="arch" type="xml">
+            <form string="Message">
+                <header>
+                    <button name="action_reply_email" type="object" string="📧 Send Reply"
+                            class="btn-primary" invisible="platform != 'email' or replied"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="platform" readonly="1"/>
+                            <field name="account_id" readonly="1"/>
+                            <field name="chat_id" readonly="1"/>
+                            <field name="chat_type" readonly="1"/>
+                            <field name="sender_name" readonly="1"/>
+                            <field name="is_from_me" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="message_time" readonly="1"/>
+                            <field name="message_type" readonly="1"/>
+                            <field name="is_edited" readonly="1"/>
+                            <field name="permalink" widget="url" readonly="1" invisible="not permalink"/>
+                        </group>
+                    </group>
+                    <group string="Message">
+                        <field name="message_text" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Quoted" invisible="not quoted_text_preview">
+                        <field name="quoted_text_preview" readonly="1" nolabel="1"/>
+                    </group>
+                    <group string="Detail">
+                        <field name="reply_to_ext_id" readonly="1" invisible="not reply_to_ext_id"/>
+                        <field name="is_forwarded" readonly="1"/>
+                        <field name="forward_score" readonly="1" invisible="forward_score == 0"/>
+                        <field name="mentions" readonly="1" invisible="not mentions"/>
+                        <field name="reactions" readonly="1" invisible="not reactions"/>
+                        <field name="is_story" readonly="1"/>
+                        <field name="is_deleted" readonly="1"/>
+                        <field name="is_view_once" readonly="1"/>
+                        <field name="is_voice_note" readonly="1" invisible="not is_voice_note"/>
+                        <field name="media_duration" readonly="1" invisible="media_duration == 0"/>
+                        <field name="media_size" readonly="1" invisible="media_size == 0"/>
+                        <field name="latitude" readonly="1" invisible="latitude == 0"/>
+                        <field name="longitude" readonly="1" invisible="longitude == 0"/>
+                        <field name="delivery_status" readonly="1"/>
+                        <field name="read_by" readonly="1" invisible="not read_by"/>
+                    </group>
+                    <group string="Reply (Email)" invisible="platform != 'email' or replied">
+                        <field name="reply_text" nolabel="1" placeholder="Tulis balasan email…"/>
+                    </group>
+                    <group string="Attachment" invisible="not has_attachment">
+                        <field name="attachment_data" widget="binary" filename="attachment_filename"/>
+                        <field name="attachment_filename" readonly="1"/>
+                        <field name="attachment_url" widget="url" readonly="1" invisible="not attachment_url"/>
+                        <field name="attachment_mime" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cb_message_search" model="ir.ui.view">
+        <field name="name">cb.message.search</field>
+        <field name="model">cb.message</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="message_text" string="Content"/>
+                <field name="sender_name"/>
+                <field name="chat_id"/>
+                <filter string="WhatsApp" name="wa" domain="[('platform','=','whatsapp')]"/>
+                <filter string="Telegram" name="tg" domain="[('platform','=','telegram')]"/>
+                <filter string="Discord" name="dc" domain="[('platform','=','discord')]"/>
+                <filter string="Instagram" name="ig" domain="[('platform','=','instagram')]"/>
+                <filter string="Threads" name="th" domain="[('platform','=','threads')]"/>
+                <separator/>
+                <filter string="My Messages" name="mine" domain="[('is_from_me','=',True)]"/>
+                <filter string="Has Attachment" name="att" domain="[('has_attachment','=',True)]"/>
+                <filter string="Stories/Status" name="story" domain="[('is_story','=',True)]"/>
+                <filter string="Deleted" name="deleted" domain="[('is_deleted','=',True)]"/>
+                <filter string="Voice Notes" name="voice" domain="[('is_voice_note','=',True)]"/>
+                <filter string="Read" name="read" domain="[('delivery_status','=','read')]"/>
+                <filter string="Unread (sent/delivered)" name="unread" domain="[('delivery_status','in',('sent','delivered'))]"/>
+                <filter string="Today" name="today"
+                        domain="[('message_time','&gt;=',context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Platform" name="by_plat" context="{'group_by':'platform'}"/>
+                    <filter string="Chat" name="by_chat" context="{'group_by':'chat_id'}"/>
+                    <filter string="Sender" name="by_sender" context="{'group_by':'sender_name'}"/>
+                    <filter string="Type" name="by_type" context="{'group_by':'message_type'}"/>
+                    <filter string="Day" name="by_day" context="{'group_by':'message_time:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cb_message" model="ir.actions.act_window">
+        <field name="name">All Messages</field>
+        <field name="res_model">cb.message</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_cb_message_search"/>
+    </record>
+</odoo>

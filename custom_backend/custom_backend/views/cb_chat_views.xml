@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cb_chat_list" model="ir.ui.view">
+        <field name="name">cb.chat.list</field>
+        <field name="model">cb.chat</field>
+        <field name="arch" type="xml">
+            <list string="Chats">
+                <field name="name"/>
+                <field name="platform" widget="badge"/>
+                <field name="chat_type"/>
+                <field name="account_id"/>
+                <field name="message_count"/>
+                <field name="last_message_at"/>
+                <field name="last_message_preview"/>
+                <field name="is_recording" widget="boolean_toggle"/>
+                <field name="exclude_from_ai" widget="boolean_toggle"/>
+                <field name="is_archived" optional="show"/>
+                <field name="is_pinned" optional="show"/>
+                <field name="is_muted" optional="hide"/>
+                <field name="unread_count" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cb_chat_search" model="ir.ui.view">
+        <field name="name">cb.chat.search</field>
+        <field name="model">cb.chat</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter string="Groups" name="grp" domain="[('chat_type','in',('group','channel'))]"/>
+                <filter string="DMs" name="dm" domain="[('chat_type','=','dm')]"/>
+                <filter string="Archived" name="arch" domain="[('is_archived','=',True)]"/>
+                <filter string="Pinned" name="pin" domain="[('is_pinned','=',True)]"/>
+                <filter string="Unread" name="unread" domain="[('unread_count','>',0)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Platform" name="by_plat" context="{'group_by':'platform'}"/>
+                    <filter string="Type" name="by_type" context="{'group_by':'chat_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cb_chat" model="ir.actions.act_window">
+        <field name="name">Chats</field>
+        <field name="res_model">cb.chat</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_cb_chat_search"/>
+    </record>
+</odoo>

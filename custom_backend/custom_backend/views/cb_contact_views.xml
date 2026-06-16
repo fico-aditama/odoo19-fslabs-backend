@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cb_contact_list" model="ir.ui.view">
+        <field name="name">cb.contact.list</field>
+        <field name="model">cb.contact</field>
+        <field name="arch" type="xml">
+            <list string="Contacts">
+                <field name="name"/>
+                <field name="platform" widget="badge"/>
+                <field name="jid"/>
+                <field name="presence" widget="badge"
+                       decoration-success="presence == 'available'"
+                       decoration-muted="presence == 'unavailable'"
+                       decoration-info="presence in ('composing','recording')"/>
+                <field name="last_seen"/>
+                <field name="presence_updated"/>
+                <field name="is_business" optional="show"/>
+                <field name="about" optional="hide"/>
+                <field name="account_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cb_contact_form" model="ir.ui.view">
+        <field name="name">cb.contact.form</field>
+        <field name="model">cb.contact</field>
+        <field name="arch" type="xml">
+            <form string="Contact">
+                <sheet>
+                    <field name="avatar_url" widget="image_url" class="oe_avatar"
+                           invisible="not avatar_url"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="jid" readonly="1"/>
+                            <field name="phone_number" readonly="1"/>
+                            <field name="account_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="presence" readonly="1"/>
+                            <field name="last_seen" readonly="1"/>
+                            <field name="is_business" readonly="1"/>
+                            <field name="business_name" readonly="1" invisible="not is_business"/>
+                        </group>
+                    </group>
+                    <group string="About / Status">
+                        <field name="about" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Avatar URL" invisible="not avatar_url">
+                        <field name="avatar_url" widget="url" readonly="1" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cb_contact_search" model="ir.ui.view">
+        <field name="name">cb.contact.search</field>
+        <field name="model">cb.contact</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="jid"/>
+                <filter string="🟢 Online" name="online" domain="[('presence','=','available')]"/>
+                <filter string="⚫ Offline" name="offline" domain="[('presence','=','unavailable')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Presence" name="by_presence" context="{'group_by':'presence'}"/>
+                    <filter string="Platform" name="by_plat" context="{'group_by':'platform'}"/>
+                    <filter string="Account" name="by_acc" context="{'group_by':'account_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cb_contact" model="ir.actions.act_window">
+        <field name="name">Contacts</field>
+        <field name="res_model">cb.contact</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_cb_contact_search"/>
+    </record>
+</odoo>

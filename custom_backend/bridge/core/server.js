@@ -40,5 +40,10 @@ export function createServer(manager) {
         catch (e) { res.status(400).json({ ok: false, error: e.message }); }
     });
 
+    app.post("/cb/bridge/resync", auth, async (req, res) => {
+        try { res.json(await manager.resync(req.body.token)); }
+        catch (e) { res.status(400).json({ ok: false, error: e.message }); }
+    });
+
     return app;
 }

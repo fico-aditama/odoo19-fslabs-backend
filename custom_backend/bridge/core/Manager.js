@@ -85,6 +85,12 @@ export class Manager {
         return await a.sendMessage(opts);
     }
 
+    async resync(token) {
+        const a = this.adapters.get(token);
+        if (!a) throw new Error("account_not_found");
+        return await a.resync();
+    }
+
     getStatus() {
         const r = {};
         for (const [t, a] of this.adapters) r[t] = a.getStatus();
