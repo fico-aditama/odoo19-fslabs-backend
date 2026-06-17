@@ -145,16 +145,28 @@ export class TelegramAdapter extends BaseAdapter {
     }
 
     _registerHandlers() {
-        this.client.addEventHandler(async (event) => {
+        const onMsg = async (event) => {
             try {
                 const msg = event.message;
                 if (!msg) return;
-                const chat = await msg.getChat();
-                const chatId = String(msg.chatId);
-                const { type, name } = this._chatMeta(chat, chatId);
+                // chatId TANPA bergantung getChat (biar pesan dari org baru/uncached tetap masuk)
+                let chatId = "";
+                try { chatId = String(msg.chatId); } catch {}
+                if (!chatId || chatId === "undefined") {
+                    const pid = msg.peerId || {};
+                    chatId = String(pid.userId || pid.chatId || pid.channelId || msg.senderId || "unknown");
+                }
+                let type = "dm", name = chatId;
+                try {
+                    const chat = await msg.getChat();   // best-effort; kalau gagal jangan drop
+                    const meta = this._chatMeta(chat, chatId);
+                    type = meta.type; name = meta.name;
+                } catch (e) { /* entity belum di-cache → tetap rekam pakai chatId */ }
                 this._enqueue(await this._build(msg, chatId, type, name));
             } catch (e) { this._log(`Handler err: ${e.message}`); }
-        }, new NewMessage({}));
+        };
+        // incoming + outgoing eksplisit
+        this.client.addEventHandler(onMsg, new NewMessage({ incoming: true, outgoing: true }));
     }
 
     async _build(msg, chatId, chatType, chatName) {
